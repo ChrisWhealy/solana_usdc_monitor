@@ -1,5 +1,7 @@
 # Solana Blockchain Monitor
 
+This is a small PoC application to monitor the Solana blockchain for USDC transactions.
+
 ## Backend
 
 Rust application that exposes USDC transaction information via http://localhost:3000/transactions
@@ -32,6 +34,8 @@ Rust application that exposes USDC transaction information via http://localhost:
    [2025-02-13T16:19:25Z INFO  solana_usdc_backend::slot] <--- Slot 320414738: Processed 2086 transactions in 1.712s
    [2025-02-13T16:19:25Z INFO  solana_usdc_backend] Sleeping for 1 second(s)
    ```
+4) The server will continue to run until you press ctrl-c
+
    
 ## Frontend
 
