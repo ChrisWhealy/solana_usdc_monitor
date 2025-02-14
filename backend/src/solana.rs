@@ -2,8 +2,13 @@ use serde::{Deserialize, Serialize};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct SignedUsdcTransaction {
+pub struct SignedUsdcTransactionsBySlot {
     pub slot: u64,
+    pub txns: Vec<SignedUsdcTransaction>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct SignedUsdcTransaction {
     pub signatures: Vec<String>,
     pub txn: UsdcTransaction,
 }

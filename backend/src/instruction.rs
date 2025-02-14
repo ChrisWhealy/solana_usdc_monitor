@@ -6,10 +6,10 @@ use solana_transaction_status::{
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 fn get_prop_as_str<'a>(obj: &'a Map<String, Value>, property: &'a str) -> Option<&'a str> {
-    obj.get(property).and_then(|s| s.as_str())
+    obj.get(property).and_then(|v| v.as_str())
 }
 fn get_prop_as_f64(obj: &Map<String, Value>, property: &str) -> Option<f64> {
-    obj.get(property).and_then(|s| s.as_f64())
+    obj.get(property).and_then(|v| v.as_f64())
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

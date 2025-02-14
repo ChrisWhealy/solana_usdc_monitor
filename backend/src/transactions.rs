@@ -7,7 +7,6 @@ use solana_transaction_status::{
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 pub fn process_transaction(
-    slot: u64,
     txn: &EncodedTransactionWithStatusMeta,
 ) -> Vec<SignedUsdcTransaction> {
     let mut signed_txns: Vec<SignedUsdcTransaction> = Vec::new();
@@ -25,7 +24,6 @@ pub fn process_transaction(
             if let Some(txn) = process_instruction(i) {
                 info!("{}", txn);
                 signed_txns.push(SignedUsdcTransaction {
-                    slot,
                     signatures: signatures.clone(),
                     txn,
                 });

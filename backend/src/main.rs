@@ -3,7 +3,7 @@ mod slot;
 mod solana;
 mod transactions;
 
-use crate::{slot::process_slot_txns, solana::SignedUsdcTransaction};
+use crate::{slot::process_slot_txns, solana::SignedUsdcTransactionsBySlot};
 
 use axum::{routing::get, Json, Router};
 use env_logger;
@@ -12,6 +12,7 @@ use solana_client::rpc_client::RpcClient;
 use std::{net::SocketAddr, str::FromStr, sync::Arc, time::Duration};
 use tokio::{sync::Mutex, task, time::sleep};
 use tower_http::cors::{Any, CorsLayer};
+use crate::solana::SignedUsdcTransaction;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const SOLANA_RPC_URL: &str = "https://api.mainnet-beta.solana.com";
@@ -25,7 +26,7 @@ const SLEEP_TIME: Duration = Duration::from_secs(1);
 async fn main() {
     env_logger::init();
 
-    let txns: Arc<Mutex<Vec<SignedUsdcTransaction>>> = Arc::new(Mutex::new(Vec::new()));
+    let txns: Arc<Mutex<Vec<SignedUsdcTransactionsBySlot>>> = Arc::new(Mutex::new(Vec::new()));
     let txns_clone = Arc::clone(&txns);
 
     task::spawn(async move {
@@ -50,7 +51,7 @@ async fn main() {
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-async fn monitor_solana_txns(transactions: Arc<Mutex<Vec<SignedUsdcTransaction>>>) {
+async fn monitor_solana_txns(transactions: Arc<Mutex<Vec<SignedUsdcTransactionsBySlot>>>) {
     let mut start_slot: u64 = 0;
     let rpc_client = RpcClient::new(SOLANA_RPC_URL.to_string());
 
@@ -73,8 +74,16 @@ async fn monitor_solana_txns(transactions: Arc<Mutex<Vec<SignedUsdcTransaction>>
 
         // Process all transactions per slot
         for slot in slots.iter() {
-            for txn in process_slot_txns(&rpc_client, *slot) {
-                transactions.lock().await.push(txn.clone());
+            let mut signed_usdc_txns: Vec<SignedUsdcTransaction> = Vec::new();
+            for txn in process_slot_txns(&rpc_client, *slot).txns {
+                signed_usdc_txns.push(txn);
+            }
+
+            if signed_usdc_txns.len() > 0 {
+                transactions.lock().await.push(SignedUsdcTransactionsBySlot {
+                    slot: *slot,
+                    txns: signed_usdc_txns
+                });
             }
         }
 
@@ -92,7 +101,7 @@ async fn monitor_solana_txns(transactions: Arc<Mutex<Vec<SignedUsdcTransaction>>
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 async fn get_transactions(
-    state: axum::extract::State<Arc<Mutex<Vec<SignedUsdcTransaction>>>>,
-) -> Json<Vec<SignedUsdcTransaction>> {
+    state: axum::extract::State<Arc<Mutex<Vec<SignedUsdcTransactionsBySlot>>>>,
+) -> Json<Vec<SignedUsdcTransactionsBySlot>> {
     Json(state.lock().await.clone())
 }

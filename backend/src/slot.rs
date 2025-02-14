@@ -1,4 +1,7 @@
-use crate::{solana::SignedUsdcTransaction, transactions::process_transaction};
+use crate::{
+    solana::{SignedUsdcTransaction, SignedUsdcTransactionsBySlot},
+    transactions::process_transaction,
+};
 
 use log::{error, info};
 use solana_client::{rpc_client::RpcClient, rpc_config::RpcBlockConfig};
@@ -6,7 +9,7 @@ use solana_transaction_status::UiTransactionEncoding;
 use tokio::time::Instant;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-pub fn process_slot_txns(rpc_client: &RpcClient, slot: u64) -> Vec<SignedUsdcTransaction> {
+pub fn process_slot_txns(rpc_client: &RpcClient, slot: u64) -> SignedUsdcTransactionsBySlot {
     let slot_start_time = Instant::now();
     let rpc_client_config = RpcBlockConfig {
         encoding: Some(UiTransactionEncoding::JsonParsed),
@@ -34,11 +37,11 @@ pub fn process_slot_txns(rpc_client: &RpcClient, slot: u64) -> Vec<SignedUsdcTra
                     // Exclude any transactions whose meta.err property is populated
                     if &inner_txn.meta.is_some() == &true {
                         if inner_txn.meta.clone().unwrap().err.is_some() {
-                            continue
+                            continue;
                         }
                     }
-                    
-                    usdc_txns.append(&mut process_transaction(slot, inner_txn));
+
+                    usdc_txns.append(&mut process_transaction(inner_txn));
                 }
             }
 
@@ -52,5 +55,8 @@ pub fn process_slot_txns(rpc_client: &RpcClient, slot: u64) -> Vec<SignedUsdcTra
         Err(e) => error!("<--- Slot {}: {}", slot, e),
     };
 
-    usdc_txns
+    SignedUsdcTransactionsBySlot {
+        slot,
+        txns: usdc_txns,
+    }
 }
