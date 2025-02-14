@@ -16,11 +16,21 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Table Container */
+/* Top level DIV */
+.div-top {
+  margin-bottom: "20px";
+  display: "flex";
+  gap: "10px";
+  align-items:"center";
+  padding: 20px;
+}
+
+/* Transactions grouped by slot */
 .txn-table {
   border-collapse: separate;
   border-spacing: 0;
   border-radius: 10px;
+  border: 0;
   overflow: hidden;
   width: 100%;
   margin: 1rem 0;
@@ -101,6 +111,8 @@ body {
 }
 
 .sig-label {
+  padding-left: 20px;
+  padding-right: 20px;
   font-size: large;
   color: antiquewhite;
 }
