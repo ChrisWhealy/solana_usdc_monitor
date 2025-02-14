@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
 
 interface SignedUsdcTransactionBySlot {
     slot: number;
@@ -51,37 +51,33 @@ function App() {
     };
 
     return (
-        <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
-            <h1>Solana USDC Transactions</h1>
-            {loading && <p>Loading transactions...</p>}
-            {error && <p style={{ color: "red" }}>Error: {error}</p>}
-                {transactions.length === 0 ? (
-                    <p>No transactions found</p>
-                ) : (
-                  transactions.map((txnsBySlot, index) => (
-                  <table border={1} cellPadding={8} style={{ width: "100%", marginTop: "10px" }}>
-                      <tr key={index}><td style={{ fontWeight: "700"}}>Latest block: {txnsBySlot.slot}</td></tr>
-                      <tr>
-                        <td>
+      <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
+          <h1>Solana USDC Transactions</h1>
+          {loading && <p>Loading transactions...</p>}
+          {error && <p style={{ color: "red" }}>Error: {error}</p>}
+          {transactions.length === 0 ? (
+              <p>No transactions found</p>
+          ) : (
+              <table border={0} cellPadding={3} cellSpacing={0} style={{ width: "100%", marginTop: "10px" }}>
+                  {transactions.map((txnsBySlot, index) => (
+                      <Fragment key={index}>
+                          <tr><td colSpan={6} style={{ fontWeight: "700"}}>Latest block: {txnsBySlot.slot}</td></tr>
                           {txnsBySlot.txns.map((tx, txnIndex) => (
-                            <table>
-                              <tr key={txnIndex}>
-                                <td>TX detected:</td>
-                                <td>{tx.txn.from}</td>
-                                <td>sent</td>
-                                <td>{tx.txn.amount}</td>
-                                <td>USDC to</td>
-                                <td>{tx.txn.to}</td>
+                              <tr key={`${index}-${txnIndex}`}>
+                                  <td>TX detected:</td>
+                                  <td>{tx.txn.from}</td>
+                                  <td>sent</td>
+                                  <td style={{textAlign: "right"}}>{tx.txn.amount}</td>
+                                  <td>USDC to</td>
+                                  <td>{tx.txn.to}</td>
                               </tr>
-                            </table>
                           ))}
-                        </td>
-                      </tr>
-                  </table>
-                  ))
-                )}
-        </div>
-    );
+                      </Fragment>
+                  ))}
+              </table>
+          )}
+      </div>
+  );
 }
 
 export default App;
