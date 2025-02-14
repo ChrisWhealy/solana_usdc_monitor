@@ -5,6 +5,7 @@ mod transactions;
 
 use crate::{slot::process_slot_txns, solana::SignedUsdcTransactionsBySlot};
 
+use crate::solana::SignedUsdcTransaction;
 use axum::{routing::get, Json, Router};
 use env_logger;
 use log::{error, info};
@@ -12,7 +13,6 @@ use solana_client::rpc_client::RpcClient;
 use std::{net::SocketAddr, str::FromStr, sync::Arc, time::Duration};
 use tokio::{sync::Mutex, task, time::sleep};
 use tower_http::cors::{Any, CorsLayer};
-use crate::solana::SignedUsdcTransaction;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const SOLANA_RPC_URL: &str = "https://api.mainnet-beta.solana.com";
@@ -42,11 +42,11 @@ async fn main() {
         .route("/transactions", get(get_transactions))
         .layer(permissive_cors)
         .with_state(txns);
+    let listener = tokio::net::TcpListener::bind(SocketAddr::from_str(LOCAL_ADDR).unwrap())
+        .await
+        .unwrap();
 
-    let addr = SocketAddr::from_str(LOCAL_ADDR).unwrap();
     info!("Server running on http://{}", LOCAL_ADDR);
-
-    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
 
@@ -56,34 +56,41 @@ async fn monitor_solana_txns(transactions: Arc<Mutex<Vec<SignedUsdcTransactionsB
     let rpc_client = RpcClient::new(SOLANA_RPC_URL.to_string());
 
     loop {
-        // Assume that no slots are available
-        let mut slots: Vec<u64> = vec![];
-
-        // Fetch latest slot, or slot range from the last one processed up till now
-        if start_slot == 0 {
+        // Fetch latest slot, or slot range
+        let slots: Vec<u64> = if start_slot == 0 {
             match rpc_client.get_slot() {
-                Ok(slot) => slots = vec![slot],
-                Err(e) => error!("{}", e),
+                Ok(slot) => vec![slot],
+                Err(e) => {
+                    error!("{}", e);
+                    vec![]
+                }
             }
         } else {
             match rpc_client.get_blocks(start_slot, None) {
-                Ok(s) => slots = s,
-                Err(e) => error!("{}", e),
+                Ok(s) => s,
+                Err(e) => {
+                    error!("{}", e);
+                    vec![]
+                }
             }
         };
 
         // Process all transactions per slot
         for slot in slots.iter() {
-            let mut signed_usdc_txns: Vec<SignedUsdcTransaction> = Vec::new();
-            for txn in process_slot_txns(&rpc_client, *slot).txns {
-                signed_usdc_txns.push(txn);
-            }
+            let signed_usdc_txns: Vec<SignedUsdcTransaction> =
+                process_slot_txns(&rpc_client, *slot)
+                    .txns
+                    .into_iter()
+                    .collect();
 
-            if signed_usdc_txns.len() > 0 {
-                transactions.lock().await.push(SignedUsdcTransactionsBySlot {
-                    slot: *slot,
-                    txns: signed_usdc_txns
-                });
+            if !signed_usdc_txns.is_empty() {
+                transactions
+                    .lock()
+                    .await
+                    .push(SignedUsdcTransactionsBySlot {
+                        slot: *slot,
+                        txns: signed_usdc_txns,
+                    });
             }
         }
 
