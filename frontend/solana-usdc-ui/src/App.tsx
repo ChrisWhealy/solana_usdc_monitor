@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 
-interface SignedUsdcTransaction {
+interface SignedUsdcTransactionBySlot {
     slot: number;
+    txns: SignedUsdcTransaction[];
+}
+
+interface SignedUsdcTransaction {
     signatures: string[];
     txn: UsdcTransaction;
 }
@@ -16,7 +20,7 @@ const API_URL = "http://localhost:3000/transactions";
 const REFRESH_INTERVAL = 2000;
 
 function App() {
-    const [transactions, setTransactions] = useState<SignedUsdcTransaction[]>([]);
+    const [transactions, setTransactions] = useState<SignedUsdcTransactionBySlot[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -32,10 +36,10 @@ function App() {
             const response = await fetch(API_URL);
 
             if (!response.ok) {
-                throw new Error("Fetch failed");
+                throw new Error(`Fetch failed: ${response.text}`);
             }
 
-            const data: SignedUsdcTransaction[] = await response.json();
+            const data: SignedUsdcTransactionBySlot[] = await response.json();
 
             setTransactions(data);
             setError(null);
@@ -51,36 +55,31 @@ function App() {
             <h1>Solana USDC Transactions</h1>
             {loading && <p>Loading transactions...</p>}
             {error && <p style={{ color: "red" }}>Error: {error}</p>}
-            <table border={1} cellPadding={8} style={{ width: "100%", marginTop: "10px" }}>
-                <thead>
-                <tr>
-                    <th>Slot</th>
-                    <th>Signatures</th>
-                    <th>From</th>
-                    <th>To</th>
-                    <th>Amount (USDC)</th>
-                </tr>
-                </thead>
-                <tbody>
                 {transactions.length === 0 ? (
-                    <tr><td colSpan={5} style={{ textAlign: "center" }}>No transactions found</td></tr>
+                    <p>No transactions found</p>
                 ) : (
-                    transactions.map((tx, index) => (
-                        <tr key={index}>
-                            <td>{tx.slot}</td>
-                            <td>
-                                {tx.signatures.map((sig, i) => (
-                                    <div key={i}>{sig}</div>
-                                ))}
-                            </td>
-                            <td>{tx.txn.from}</td>
-                            <td>{tx.txn.to}</td>
-                            <td>{tx.txn.amount.toFixed(6)}</td>
-                        </tr>
-                    ))
+                  transactions.map((txnsBySlot, index) => (
+                  <table border={1} cellPadding={8} style={{ width: "100%", marginTop: "10px" }}>
+                      <tr key={index}><td style={{ fontWeight: "700"}}>Latest block: {txnsBySlot.slot}</td></tr>
+                      <tr>
+                        <td>
+                          {txnsBySlot.txns.map((tx, txnIndex) => (
+                            <table>
+                              <tr key={txnIndex}>
+                                <td>TX detected:</td>
+                                <td>{tx.txn.from}</td>
+                                <td>sent</td>
+                                <td>{tx.txn.amount}</td>
+                                <td>USDC to</td>
+                                <td>{tx.txn.to}</td>
+                              </tr>
+                            </table>
+                          ))}
+                        </td>
+                      </tr>
+                  </table>
+                  ))
                 )}
-                </tbody>
-            </table>
         </div>
     );
 }
