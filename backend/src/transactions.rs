@@ -29,7 +29,7 @@ pub fn process_transaction(
                 });
             }
         }),
-        _ => info!("     Parsed JSON message not found"),
+        _ => info!("Parsed JSON message not found"),
     }
 
     signed_txns
