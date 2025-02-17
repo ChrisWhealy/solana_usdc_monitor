@@ -88,7 +88,7 @@ function App() {
       <Fragment key={`slot-${txnsBySlot.slot}`}>
         <tr>
           <td className="slot-hdr" colSpan={COL_COUNT} style={{ fontWeight: "700"}}>
-              Latest block: {txnsBySlot.slot}
+            Latest block: {txnsBySlot.slot}
           </td>
         </tr>
         {txnsBySlot.txns.map((tx) => (
