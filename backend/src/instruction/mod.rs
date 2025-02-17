@@ -11,6 +11,9 @@ fn get_prop_as_str<'a>(obj: &'a Map<String, Value>, property: &'a str) -> Option
 fn get_prop_as_f64(obj: &Map<String, Value>, property: &str) -> Option<f64> {
     obj.get(property).and_then(|v| v.as_f64())
 }
+fn get_prop_as_str_then_f64(obj: &Map<String, Value>, property: &str) -> Option<f64> {
+    get_prop_as_str(obj, property).map(|s| s.parse::<f64>().unwrap())
+}
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // This function will bail out at the earliest opportunity
@@ -51,8 +54,15 @@ pub fn process_instruction(instruction: &UiInstruction) -> Option<UsdcTransactio
                 };
 
                 // If info.amount is missing, then look for tokenAmount.uiAmount
-                let amount = if let Some(amt) = get_prop_as_f64(info,"amount") {
-                    amt
+                let amount = if let Some(amt) = get_prop_as_str_then_f64(info,"amount") {
+                    let exp = if let Some(decimals) = get_prop_as_f64(info,"decimals") {
+                        decimals
+                    } else {
+                        // If decimal places are not specified, then assume 6
+                        6_f64
+                    };
+                    
+                    amt / 10_f64.powf(exp)
                 } else {
                     if let Some(mut token_amount) = info
                         .get("tokenAmount")
@@ -80,3 +90,7 @@ pub fn process_instruction(instruction: &UiInstruction) -> Option<UsdcTransactio
 
     None
 }
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#[cfg(test)]
+mod unit_tests;
