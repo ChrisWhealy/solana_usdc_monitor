@@ -12,7 +12,7 @@ pub const AMOUNT_F64: f64 = 1.470;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 // Info contains amount and decimals
-fn test_01_data() -> Value {
+fn test_data_amount_and_decimals() -> Value {
     json!({
         "info": {
             "authority": AUTHORITY,
@@ -27,7 +27,7 @@ fn test_01_data() -> Value {
 }
 
 // Info contains only amount
-fn test_02_data() -> Value {
+fn test_data_amount() -> Value {
     json!({
         "info": {
             "authority": AUTHORITY,
@@ -41,26 +41,7 @@ fn test_02_data() -> Value {
 }
 
 // Complete instruction
-fn test_03_data() -> Value {
-    json!({
-        "info": {
-            "authority": AUTHORITY,
-            "destination": DESTINATION,
-            "source": SOURCE,
-            "mint": USDC_MINT,
-            "tokenAmount": {
-                "amount": "1470000000",
-                "decimals": 9,
-                "uiAmount": AMOUNT_F64,
-                "uiAmountString": "1.47"
-            }
-        },
-        "type": "transferChecked"
-    })
-}
-
-// Complete instruction
-fn test_04_data() -> Value {
+fn test_data_complete_instruction() -> Value {
     json!({
         "info": {
             "authority": AUTHORITY,
@@ -79,7 +60,7 @@ fn test_04_data() -> Value {
 }
 
 // Empty info 
-fn test_05_data() -> Value {
+fn test_data_empty_info() -> Value {
     json!({
         "info": {},
         "type": "transferChecked"
@@ -87,7 +68,7 @@ fn test_05_data() -> Value {
 }
 
 // Missing source 
-fn test_06_data() -> Value {
+fn test_data_missing_source() -> Value {
     json!({
         "info": {
             "authority": AUTHORITY,
@@ -105,7 +86,7 @@ fn test_06_data() -> Value {
 }
 
 // Missing destination
-fn test_07_data() -> Value {
+fn test_data_missing_destination() -> Value {
     json!({
         "info": {
             "authority": AUTHORITY,
@@ -123,7 +104,7 @@ fn test_07_data() -> Value {
 }
 
 // Missing mint
-fn test_08_data() -> Value {
+fn test_data_missing_mint() -> Value {
     json!({
         "info": {
             "authority": AUTHORITY,
@@ -141,7 +122,7 @@ fn test_08_data() -> Value {
 }
 
 // Missing tokenAmount property
-fn test_09_data() -> Value {
+fn test_data_missing_token_amount() -> Value {
     json!({
         "info": {
             "authority": AUTHORITY,
@@ -154,7 +135,7 @@ fn test_09_data() -> Value {
 }
 
 // Missing tokenAmount.uiAmount property
-fn test_10_data() -> Value {
+fn test_data_missing_token_amount_ui_amount() -> Value {
     json!({
         "info": {
             "authority": AUTHORITY,
@@ -175,16 +156,16 @@ fn test_10_data() -> Value {
 fn get_test_map() -> HashMap<u8, Value> {
     let mut test_map: HashMap<u8, Value> = HashMap::new();
 
-    test_map.insert(1, test_01_data());
-    test_map.insert(2, test_02_data());
-    test_map.insert(3, test_03_data());
-    test_map.insert(4, test_04_data());
-    test_map.insert(5, test_05_data());
-    test_map.insert(6, test_06_data());
-    test_map.insert(7, test_07_data());
-    test_map.insert(8, test_08_data());
-    test_map.insert(9, test_09_data());
-    test_map.insert(10, test_10_data());
+    test_map.insert(1, test_data_amount_and_decimals());
+    test_map.insert(2, test_data_amount());
+    test_map.insert(3, test_data_complete_instruction());
+    test_map.insert(4, test_data_complete_instruction());
+    test_map.insert(5, test_data_empty_info());
+    test_map.insert(6, test_data_missing_source());
+    test_map.insert(7, test_data_missing_destination());
+    test_map.insert(8, test_data_missing_mint());
+    test_map.insert(9, test_data_missing_token_amount());
+    test_map.insert(10, test_data_missing_token_amount_ui_amount());
 
     test_map
 }
