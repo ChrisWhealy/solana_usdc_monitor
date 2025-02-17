@@ -95,4 +95,4 @@ pub fn process_instruction(instruction: &UiInstruction) -> Option<UsdcTransactio
 #[cfg(test)]
 mod unit_tests;
 #[cfg(test)]
-mod test_data;
+pub mod test_data;

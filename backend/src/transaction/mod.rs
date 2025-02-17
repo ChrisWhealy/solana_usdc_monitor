@@ -6,9 +6,7 @@ use solana_transaction_status::{
 };
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-pub fn process_transaction(
-    txn: &EncodedTransactionWithStatusMeta,
-) -> Vec<SignedUsdcTransaction> {
+pub fn process_transaction(txn: &EncodedTransactionWithStatusMeta) -> Vec<SignedUsdcTransaction> {
     let mut signed_txns: Vec<SignedUsdcTransaction> = Vec::new();
 
     match &txn.transaction {
