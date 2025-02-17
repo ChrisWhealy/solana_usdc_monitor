@@ -1,11 +1,12 @@
 mod instruction;
 mod slot;
 mod solana;
-mod transactions;
+mod transaction;
 
-use crate::{slot::process_slot_txns, solana::SignedUsdcTransactionsBySlot};
+use crate::{
+    slot::process_slot_txns, solana::SignedUsdcTransaction, solana::SignedUsdcTransactionsBySlot,
+};
 
-use crate::solana::SignedUsdcTransaction;
 use axum::{routing::get, Json, Router};
 use env_logger;
 use log::{error, info};

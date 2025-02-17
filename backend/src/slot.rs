@@ -1,6 +1,6 @@
 use crate::{
     solana::{SignedUsdcTransaction, SignedUsdcTransactionsBySlot},
-    transactions::process_transaction,
+    transaction::process_transaction,
 };
 
 use log::{error, info};
