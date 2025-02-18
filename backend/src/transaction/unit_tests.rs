@@ -41,7 +41,7 @@ fn get_account_keys() -> Vec<ParsedAccount> {
     ]
 }
 
-fn get_ui_txn_status_meta(with_error: bool) -> UiTransactionStatusMeta {
+pub fn get_ui_txn_status_meta(with_error: bool) -> UiTransactionStatusMeta {
     UiTransactionStatusMeta {
         err: if with_error {
             Some(TransactionError::MissingSignatureForFee)

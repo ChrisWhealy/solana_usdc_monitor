@@ -1,4 +1,7 @@
-use crate::{process_slot_txns, transaction::unit_tests::get_ui_transaction};
+use crate::{
+    process_slot_txns,
+    transaction::unit_tests::{get_ui_transaction, get_ui_txn_status_meta},
+};
 
 use async_trait::async_trait;
 use env_logger;
@@ -13,7 +16,7 @@ use solana_commitment_config::CommitmentConfig;
 use std::collections::HashMap;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-fn get_mock_response() -> Value {
+fn get_mock_response(with_meta_error: bool) -> Value {
     json!({
         "blockHeight": 298412657,
         "blockTime": 1739353792,
@@ -23,13 +26,13 @@ fn get_mock_response() -> Value {
         "rewards": [{
             "commission": null,
             "lamports": 26251371,
-            "postBalance": 11190784600i64,
+            "postBalance": 11190784600_i64,
             "pubkey": "A4hyMd3FyvUJSRafDUSwtLLaQcxRP4r1BRC9w2AJ1to2",
             "reward_type": "Fee"
         }],
         "transactions": [{
             "transaction": json!(get_ui_transaction(true)),
-            "meta": null,
+            "meta": json!(get_ui_txn_status_meta(with_meta_error)),
             "version": null
         }],
         "numPartitions": null
@@ -49,7 +52,10 @@ impl RpcSender for MockRpcSender {
             Err(client_error::ClientError::from(
                 client_error::ClientErrorKind::Io(std::io::Error::new(
                     std::io::ErrorKind::Other,
-                    format!("MockRpcSender has not been configured to respond to request: {:#?}", request),
+                    format!(
+                        "MockRpcSender has not been configured to respond to request: {:#?}",
+                        request
+                    ),
                 )),
             ))
         }
@@ -76,15 +82,15 @@ fn create_mock_client(responses: HashMap<RpcRequest, Value>) -> RpcClient {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #[test]
-fn test_01_should_process_slot_with_valid_txn() -> Result<(), String> {
+fn test_01_should_process_valid_txn() -> Result<(), String> {
     env_logger::builder()
         .is_test(true)
         .format_timestamp_millis()
         .init();
 
-    let test_slot = 12345;
+    let test_slot = 123456789;
     let mut responses = HashMap::new();
-    responses.insert(RpcRequest::GetBlock, get_mock_response());
+    responses.insert(RpcRequest::GetBlock, get_mock_response(false));
 
     let mock_client = create_mock_client(responses.clone());
     let result = process_slot_txns(&mock_client, test_slot);
@@ -93,5 +99,27 @@ fn test_01_should_process_slot_with_valid_txn() -> Result<(), String> {
         Ok(())
     } else {
         Err("Failed to process valid transaction".to_string())
+    }
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#[test]
+fn test_02_should_skip_txn_with_meta_error() -> Result<(), String> {
+    env_logger::builder()
+        .is_test(true)
+        .format_timestamp_millis()
+        .init();
+
+    let test_slot = 123456789;
+    let mut responses = HashMap::new();
+    responses.insert(RpcRequest::GetBlock, get_mock_response(true));
+
+    let mock_client = create_mock_client(responses.clone());
+    let result = process_slot_txns(&mock_client, test_slot);
+
+    if result.txns.len() > 0 {
+        Err("Should have skipped processing a txn with status meta error".to_string())
+    } else {
+        Ok(())
     }
 }
