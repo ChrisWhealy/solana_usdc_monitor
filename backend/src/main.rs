@@ -11,16 +11,16 @@ use axum::{routing::get, Json, Router};
 use env_logger;
 use log::{error, info};
 use solana_client::rpc_client::RpcClient;
-use std::{net::SocketAddr, str::FromStr, sync::Arc, time::Duration};
+use std::{env, net::SocketAddr, str::FromStr, sync::Arc, time::Duration};
 use tokio::{sync::Mutex, task, time::sleep};
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::{cors::{Any, CorsLayer}, services::ServeDir};
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-const SOLANA_RPC_URL: &str = "https://api.mainnet-beta.solana.com";
+const DEFAULT_SOLANA_RPC_URL: &str = "https://api.mainnet-beta.solana.com";
 const USDC_MINT: &str = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 const TOKEN_PROGRAM_ID: &str = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
 const LOCAL_ADDR: &str = "127.0.0.1:3000";
-const SLEEP_TIME: Duration = Duration::from_secs(1);
+const SLEEP_TIME_MILLIS: Duration = Duration::from_millis(1000);
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #[tokio::main]
@@ -40,7 +40,9 @@ async fn main() {
         .allow_headers(Any);
 
     let app = Router::new()
+        .route("/api/health", get(|| async { "API is running!" }))
         .route("/transactions", get(get_transactions))
+        .fallback_service(ServeDir::new("frontend/dist"))
         .layer(permissive_cors)
         .with_state(txns);
     let listener = tokio::net::TcpListener::bind(SocketAddr::from_str(LOCAL_ADDR).unwrap())
@@ -54,7 +56,10 @@ async fn main() {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 async fn monitor_solana_txns(transactions: Arc<Mutex<Vec<SignedUsdcTransactionsBySlot>>>) {
     let mut next_slot: u64 = 0;
-    let rpc_client = RpcClient::new(SOLANA_RPC_URL.to_string());
+    let solana_rpc_url = env::var("SOLANA_RPC_URL").unwrap_or_else(|_| DEFAULT_SOLANA_RPC_URL.to_string());
+    let rpc_client = RpcClient::new(&solana_rpc_url);
+
+    info!("Monitoring: {}", solana_rpc_url);
 
     loop {
         // Fetch latest slot, or slot range
@@ -102,8 +107,8 @@ async fn monitor_solana_txns(transactions: Arc<Mutex<Vec<SignedUsdcTransactionsB
             0
         };
 
-        info!("Sleeping for {} second(s)", SLEEP_TIME.as_secs());
-        sleep(SLEEP_TIME).await;
+        info!("Sleeping for {:?}", SLEEP_TIME_MILLIS);
+        sleep(SLEEP_TIME_MILLIS).await;
     }
 }
 
