@@ -66,7 +66,7 @@ fn get_ui_txn_status_meta(with_error: bool) -> UiTransactionStatusMeta {
     }
 }
 
-fn get_ui_transaction(with_signatures: bool) -> UiTransaction {
+pub fn get_ui_transaction(with_signatures: bool) -> UiTransaction {
     UiTransaction {
         signatures: if with_signatures {
             get_signatures()

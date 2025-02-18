@@ -18,8 +18,10 @@ pub fn process_transaction(txn: &EncodedTransactionWithStatusMeta) -> Vec<Signed
                 ..
             },
             ..,
-        ) if !signatures.is_empty() => instructions.iter().for_each(|i| {
-            if let Some(txn) = process_instruction(i) {
+        ) => instructions.iter().for_each(|i| {
+            if signatures.is_empty() {
+                // info!("Skipping unsigned transaction");
+            } else if let Some(txn) = process_instruction(i) {
                 info!("{}", txn);
                 signed_txns.push(SignedUsdcTransaction {
                     signatures: signatures.clone(),
@@ -27,7 +29,7 @@ pub fn process_transaction(txn: &EncodedTransactionWithStatusMeta) -> Vec<Signed
                 });
             }
         }),
-        _ => info!("Parsed JSON message not found"),
+        _ => info!("Transaction does not contain a JSON message"),
     }
 
     signed_txns
@@ -35,4 +37,4 @@ pub fn process_transaction(txn: &EncodedTransactionWithStatusMeta) -> Vec<Signed
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #[cfg(test)]
-mod unit_tests;
+pub mod unit_tests;

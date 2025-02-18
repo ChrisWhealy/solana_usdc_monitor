@@ -53,12 +53,12 @@ async fn main() {
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 async fn monitor_solana_txns(transactions: Arc<Mutex<Vec<SignedUsdcTransactionsBySlot>>>) {
-    let mut start_slot: u64 = 0;
+    let mut next_slot: u64 = 0;
     let rpc_client = RpcClient::new(SOLANA_RPC_URL.to_string());
 
     loop {
         // Fetch latest slot, or slot range
-        let slots: Vec<u64> = if start_slot == 0 {
+        let slots: Vec<u64> = if next_slot == 0 {
             match rpc_client.get_slot() {
                 Ok(slot) => vec![slot],
                 Err(e) => {
@@ -67,7 +67,7 @@ async fn monitor_solana_txns(transactions: Arc<Mutex<Vec<SignedUsdcTransactionsB
                 }
             }
         } else {
-            match rpc_client.get_blocks(start_slot, None) {
+            match rpc_client.get_blocks(next_slot, None) {
                 Ok(s) => s,
                 Err(e) => {
                     error!("{}", e);
@@ -95,8 +95,8 @@ async fn monitor_solana_txns(transactions: Arc<Mutex<Vec<SignedUsdcTransactionsB
             }
         }
 
-        // Bump start slot for next iteration
-        start_slot = if let Some(last_slot) = slots.last() {
+        // Bump slot number for next iteration
+        next_slot = if let Some(last_slot) = slots.last() {
             *last_slot + 1
         } else {
             0

@@ -2801,9 +2801,9 @@ dependencies = [
 
 [[package]]
 name = "raw-cpuid"
-version = "11.3.0"
+version = "11.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c6928fa44c097620b706542d428957635951bade7143269085389d42c8a4927e"
+checksum = "529468c1335c1c03919960dfefdb1b3648858c20d7ec2d0663e728e4a717efbc"
 dependencies = [
  "bitflags 2.8.0",
 ]
@@ -5549,12 +5549,15 @@ dependencies = [
 name = "solana_usdc_backend"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "axum",
  "env_logger 0.11.6",
  "log",
  "serde",
  "serde_json",
  "solana-client",
+ "solana-commitment-config",
+ "solana-reward-info",
  "solana-sdk",
  "solana-transaction-status",
  "tokio",

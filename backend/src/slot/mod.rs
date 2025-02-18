@@ -9,18 +9,21 @@ use solana_transaction_status::UiTransactionEncoding;
 use tokio::time::Instant;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-pub fn process_slot_txns(rpc_client: &RpcClient, slot: u64) -> SignedUsdcTransactionsBySlot {
-    let slot_start_time = Instant::now();
-    let rpc_client_config = RpcBlockConfig {
+fn get_rpc_client_config() -> RpcBlockConfig {
+    RpcBlockConfig {
         encoding: Some(UiTransactionEncoding::JsonParsed),
         max_supported_transaction_version: Some(0),
         ..Default::default()
-    };
+    }
+}
+
+pub fn process_slot_txns(rpc_client: &RpcClient, slot: u64) -> SignedUsdcTransactionsBySlot {
+    let slot_start_time = Instant::now();
     let mut usdc_txns: Vec<SignedUsdcTransaction> = Vec::new();
 
     info!("---> Slot {}", slot);
 
-    match rpc_client.get_block_with_config(slot, rpc_client_config) {
+    match rpc_client.get_block_with_config(slot, get_rpc_client_config()) {
         Ok(confirmed_block) => {
             info!(
                 "     get_block request took {:.3?}",
@@ -60,3 +63,7 @@ pub fn process_slot_txns(rpc_client: &RpcClient, slot: u64) -> SignedUsdcTransac
         txns: usdc_txns,
     }
 }
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#[cfg(test)]
+mod unit_tests;
