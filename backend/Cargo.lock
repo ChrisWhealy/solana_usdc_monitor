@@ -5557,7 +5557,6 @@ dependencies = [
  "serde_json",
  "solana-client",
  "solana-commitment-config",
- "solana-reward-info",
  "solana-sdk",
  "solana-transaction-status",
  "tokio",
