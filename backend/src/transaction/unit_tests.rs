@@ -85,7 +85,7 @@ pub fn get_ui_transaction(with_signatures: bool) -> UiTransaction {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #[test]
 fn test_01_should_parse_encoded_txn_without_status_meta() -> Result<(), String> {
-    let usdc_txns = process_transaction(&EncodedTransactionWithStatusMeta {
+    let (usdc_txns, _) = process_transaction(&EncodedTransactionWithStatusMeta {
         transaction: EncodedTransaction::Json(get_ui_transaction(true)),
         meta: None,
         version: None,
@@ -101,7 +101,7 @@ fn test_01_should_parse_encoded_txn_without_status_meta() -> Result<(), String> 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #[test]
 fn test_02_should_parse_encoded_txn_with_non_error_status_meta() -> Result<(), String> {
-    let usdc_txns = process_transaction(&EncodedTransactionWithStatusMeta {
+    let (usdc_txns, _) = process_transaction(&EncodedTransactionWithStatusMeta {
         transaction: EncodedTransaction::Json(get_ui_transaction(true)),
         meta: Some(get_ui_txn_status_meta(false)),
         version: None,
@@ -117,15 +117,15 @@ fn test_02_should_parse_encoded_txn_with_non_error_status_meta() -> Result<(), S
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #[test]
 fn test_03_should_not_parse_unsigned_encoded_txn() -> Result<(), String> {
-    let usdc_txns = process_transaction(&EncodedTransactionWithStatusMeta {
+    let (usdc_txns, unsigned_txn_count) = process_transaction(&EncodedTransactionWithStatusMeta {
         transaction: EncodedTransaction::Json(get_ui_transaction(false)),
         meta: Some(get_ui_txn_status_meta(false)),
         version: None,
     });
 
-    if usdc_txns.len() > 0 {
-        Err("Should not have parsed unsigned encoded transaction".to_string())
-    } else {
+    if usdc_txns.len() == 0 && unsigned_txn_count == 1 {
         Ok(())
+    } else {
+        Err("Failed to skip unsigned encoded transaction".to_string())
     }
 }
