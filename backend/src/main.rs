@@ -19,7 +19,7 @@ use tower_http::{cors::{Any, CorsLayer}, services::ServeDir};
 const DEFAULT_SOLANA_RPC_URL: &str = "https://api.mainnet-beta.solana.com";
 const USDC_MINT: &str = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
 const TOKEN_PROGRAM_ID: &str = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
-const LOCAL_ADDR: &str = "127.0.0.1:3000";
+const LOCAL_ADDR: &str = "0.0.0.0:3000";
 const SLEEP_TIME_MILLIS: Duration = Duration::from_millis(1000);
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -42,7 +42,7 @@ async fn main() {
     let app = Router::new()
         .route("/api/health", get(|| async { "API is running!" }))
         .route("/transactions", get(get_transactions))
-        .fallback_service(ServeDir::new("frontend/dist"))
+        .fallback_service(ServeDir::new("./frontend/dist"))
         .layer(permissive_cors)
         .with_state(txns);
     let listener = tokio::net::TcpListener::bind(SocketAddr::from_str(LOCAL_ADDR).unwrap())

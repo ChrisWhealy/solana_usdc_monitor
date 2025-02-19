@@ -2,55 +2,36 @@
 
 This is a small PoC application to monitor the Solana blockchain for USDC transactions.
 
-## Backend
+## Execution
 
-Rust application that exposes USDC transaction information via http://localhost:3000/transactions
+1. Ensure [Docker Desktop](https://docs.docker.com/get-started/introduction/get-docker-desktop/) has been installed
+1. Clone this repo into some local directory then change into that directory
+1. Build the Docker container:
 
-1) Ensure Rust is installed
+    `docker build -t solana-usdc-monitor .`
+1. Run the Docker container
 
-   ```bash
-   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-   ```
-
-2) Clone repo
-
-   ```bash
-   % git clone https://github.com/ChrisWhealy/solana_usdc_monitor.git
-   % cd solana_usdc_monitor
-   ```
- 
-3) Start Web server
+    `docker run -p 3000:3000 solana-usdc-monitor`
 
    ```bash
-   % cd backend
-   % cargo run
-       Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.71s
-        Running `target/debug/solana_usdc_backend`
-   [2025-02-13T16:19:23Z INFO  solana_usdc_backend] Server running on http://127.0.0.1:3000
-   [2025-02-13T16:19:23Z INFO  solana_usdc_backend::slot] ---> Slot 320414738
-   [2025-02-13T16:19:25Z INFO  solana_usdc_backend::slot]      get_block request took 1.701s
-   [2025-02-13T16:19:25Z INFO  solana_usdc_backend::transactions] TX detected: 5zsgeDG984Nd3Q65JPFYSaKMu5fzETLL56Dyj4e87sNd sent 528.572454 USDC to 2i3TLNNdStHXorusiDcquAVe6BmXQYMc3qfzyKbX1c7V
-   [2025-02-13T16:19:25Z INFO  solana_usdc_backend::transactions] TX detected: 6Vt8Xd65nTNzah9oFkoLXUxpR6mdPMqY5Bimz1MAQb9M sent 0.948717 USDC to 2am4n8dNv4HrVUVpL4SFqmdzfRznyxrBx3SXwp8WZ9pR
-   [2025-02-13T16:19:25Z INFO  solana_usdc_backend::slot] <--- Slot 320414738: Processed 2086 transactions in 1.712s
-   [2025-02-13T16:19:25Z INFO  solana_usdc_backend] Sleeping for 1 second(s)
+   % docker run -p 3000:3000 solana-usdc-monitor
+   [2025-02-19T09:26:49Z INFO  solana_usdc_backend] Server running on http://0.0.0.0:3000
+   [2025-02-19T09:26:49Z INFO  solana_usdc_backend] Monitoring: https://api.mainnet-beta.solana.com
+   [2025-02-19T09:26:51Z INFO  solana_usdc_backend::slot] ---> Slot 321659973
+   [2025-02-19T09:26:52Z INFO  solana_usdc_backend::slot]      get_block request took 649.188ms
+   [2025-02-19T09:26:52Z INFO  solana_usdc_backend::transaction] TX detected: 7nQFY83oXFTZduD3oQpwxC4AVMwGdwRooL7WhtkMBkkg sent 8.867259 USDC to 2cidtavnfrCcjbAHyWkcUfH9zWC6LmajrL4GWUFBKeje
+   [2025-02-19T09:26:52Z INFO  solana_usdc_backend::slot] <--- Slot 321659973: Processed 1605 transactions in 652.987ms
+   [2025-02-19T09:26:52Z INFO  solana_usdc_backend::slot] ---> Slot 321659974
+   [2025-02-19T09:26:52Z INFO  solana_usdc_backend::slot]      get_block request took 629.171ms
+   [2025-02-19T09:26:52Z INFO  solana_usdc_backend::slot] <--- Slot 321659974: Processed 1570 transactions in 632.451ms
+   [2025-02-19T09:26:53Z INFO  solana_usdc_backend] Sleeping for 1s
+   [2025-02-19T09:26:54Z INFO  solana_usdc_backend::slot] ---> Slot 321659975
+   [2025-02-19T09:26:54Z INFO  solana_usdc_backend::slot]      get_block request took 628.327ms
+   [2025-02-19T09:26:54Z INFO  solana_usdc_backend::slot] <--- Slot 321659975: Processed 1524 transactions in 631.708ms
+   [2025-02-19T09:26:54Z INFO  solana_usdc_backend::slot] ---> Slot 321659976
+   [2025-02-19T09:27:05Z INFO  solana_usdc_backend::slot]      get_block request took 10.850s
+   [2025-02-19T09:27:05Z INFO  solana_usdc_backend::transaction] TX detected: 5ha8tFqUGA36x3Xd2CsUg4pa4pUEBLQgbxfq1zFwEyCA sent 54.239793 USDC to 6q7Tj6RjpMdfMPY4wzt3PjSpebzE93GXdWGnH9XNPLCD
+   [2025-02-19T09:27:05Z INFO  solana_usdc_backend::slot] <--- Slot 321659976: Processed 1669 transactions in 10.854s
+   ...
    ```
-4) The server will continue to run until you press ctrl-c
-
-   
-## Frontend
-
-```bash
-% cd frontend/solana_usdc_ui
-% npm run dev
-
-> solana-usdc-ui@0.0.0 dev
-> vite
-
-
-VITE v6.1.0  ready in 232 ms
-
-➜  Local:   http://localhost:5173/
-➜  Network: use --host to expose
-➜  press h + enter to show help
-```
-   
+1. Visit <http://localhost:3000> to view USDC transactions by slot number
