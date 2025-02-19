@@ -11,8 +11,6 @@ This is a small PoC application to monitor the Solana blockchain for USDC transa
     `docker build -t solana-usdc-monitor .`
 1. Run the Docker container
 
-    `docker run -p 3000:3000 solana-usdc-monitor`
-
    ```bash
    % docker run -p 3000:3000 solana-usdc-monitor
    [2025-02-19T09:26:49Z INFO  solana_usdc_backend] Server running on http://0.0.0.0:3000
